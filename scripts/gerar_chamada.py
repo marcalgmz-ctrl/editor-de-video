@@ -92,8 +92,9 @@ def main():
             e = emoji.resize((int(emoji.width * im.height * 0.95 / emoji.height), int(im.height * 0.95)), Image.LANCZOS)
             larg_total += round(10 * k) + e.width
         x = round(a.x * k) - larg_total // 2
-        if x < 0 or x + larg_total > larg_tela:
-            print(f"AVISO: linha {i + 1} não cabe na tela ({larg_total} px); encurte o texto ou quebre com |")
+        margem = round(24 * k)
+        if x < margem or x + larg_total > larg_tela - margem:
+            print(f"AVISO: linha {i + 1} encosta na borda ({larg_total} px); encurte o texto ou quebre com |")
         texto.alpha_composite(im, (x, y))
         if emoji is not None and i == idx_ultima_vermelha:
             texto.alpha_composite(e, (x + im.width + round(10 * k), y + (im.height - e.height) // 2))
