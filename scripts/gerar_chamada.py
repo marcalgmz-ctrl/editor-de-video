@@ -60,47 +60,51 @@ def main():
     ap.add_argument("--emoji")
     ap.add_argument("--sub", default="")
     ap.add_argument("--y", type=int, default=610)
+    ap.add_argument("--x", type=int, default=CENTRO_X, help="centro horizontal do bloco (360 = centro da tela)")
+    ap.add_argument("--escala", type=float, default=1.0, help="1.5 gera em 1080x1920 (capa)")
     a = ap.parse_args()
+    k = a.escala
 
-    bebas_topo = fonte("BebasNeue-Regular.ttf", 56)
-    bebas_principal = fonte("BebasNeue-Regular.ttf", 91)
-    oswald = fonte("Oswald-Bold.ttf", 52)
+    bebas_topo = fonte("BebasNeue-Regular.ttf", round(56 * k))
+    bebas_principal = fonte("BebasNeue-Regular.ttf", round(91 * k))
+    oswald = fonte("Oswald-Bold.ttf", round(52 * k))
 
     # (imagem, espaço acima)
     blocos = []
     if a.topo:
         blocos.append((render_linha(a.topo, bebas_topo, BRANCO, espaco=1, grossura=1), 0))
     for i, l in enumerate(filter(None, a.principal.split("|"))):
-        blocos.append((render_linha(l, bebas_principal, VERMELHO, espaco=0, grossura=1), 24 if i == 0 else 8))
+        blocos.append((render_linha(l, bebas_principal, VERMELHO, espaco=0, grossura=1), round((24 if i == 0 else 8) * k)))
     for i, l in enumerate(filter(None, a.sub.split("|"))):
-        blocos.append((render_linha(l, oswald, BRANCO, espaco=1), 22 if i == 0 else 8))
+        blocos.append((render_linha(l, oswald, BRANCO, espaco=1), round((22 if i == 0 else 8) * k)))
 
     n_principal = len(list(filter(None, a.principal.split("|"))))
     idx_ultima_vermelha = (1 if a.topo else 0) + n_principal - 1 if n_principal else None
     emoji = Image.open(a.emoji).convert("RGBA") if a.emoji else None
 
-    texto = Image.new("RGBA", (W, H), (0, 0, 0, 0))
-    y = a.y
+    larg_tela, alt_tela, y0 = round(W * k), round(H * k), round(a.y * k)
+    texto = Image.new("RGBA", (larg_tela, alt_tela), (0, 0, 0, 0))
+    y = y0
     for i, (im, acima) in enumerate(blocos):
         y += acima
         larg_total = im.width
         if emoji is not None and i == idx_ultima_vermelha:
             e = emoji.resize((int(emoji.width * im.height * 0.95 / emoji.height), int(im.height * 0.95)), Image.LANCZOS)
-            larg_total += 10 + e.width
-        x = CENTRO_X - larg_total // 2
+            larg_total += round(10 * k) + e.width
+        x = round(a.x * k) - larg_total // 2
         texto.alpha_composite(im, (x, y))
         if emoji is not None and i == idx_ultima_vermelha:
-            texto.alpha_composite(e, (x + im.width + 10, y + (im.height - e.height) // 2))
+            texto.alpha_composite(e, (x + im.width + round(10 * k), y + (im.height - e.height) // 2))
         y += im.height
     fim = y
 
     # Faixa escura (~60% preto) atrás do texto, largura total, bordas suaves
-    faixa = Image.new("RGBA", (W, H), (0, 0, 0, 0))
-    ImageDraw.Draw(faixa).rectangle([0, a.y - 15, W, fim + 25], fill=(0, 0, 0, 153))
-    faixa = faixa.filter(ImageFilter.GaussianBlur(12))
+    faixa = Image.new("RGBA", (larg_tela, alt_tela), (0, 0, 0, 0))
+    ImageDraw.Draw(faixa).rectangle([0, y0 - round(15 * k), larg_tela, fim + round(25 * k)], fill=(0, 0, 0, 153))
+    faixa = faixa.filter(ImageFilter.GaussianBlur(12 * k))
 
     Image.alpha_composite(faixa, texto).save(a.saida)
-    print(f"{a.saida}: bloco de y={a.y} a y={fim}")
+    print(f"{a.saida}: bloco de y={y0} a y={fim}")
 
 
 if __name__ == "__main__":

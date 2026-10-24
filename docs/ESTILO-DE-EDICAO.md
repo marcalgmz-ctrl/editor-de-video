@@ -106,6 +106,7 @@ Referência: [`referencia/02-legenda.jpg`](referencia/02-legenda.jpg)
 - [`scripts/montar_video.sh`](../scripts/montar_video.sh): monta o layout (fundo desfocado, recorte 3:4, logo, crédito) e aplica o `.ass` via ffmpeg.
 
 - [`scripts/gerar_chamada.py`](../scripts/gerar_chamada.py): gera a chamada como PNG transparente, com fontes, tamanhos, faixa escura e posição calibradas contra o vídeo de referência. Aceita emoji colorido e uma linha extra em minúsculo (Oswald Bold).
+- [`scripts/gerar_capa.sh`](../scripts/gerar_capa.sh): gera a capa do Reels (1080×1920, mesmo layout em escala 1,5×) a partir de um quadro do vídeo. Escolha um quadro com expressão forte do lutador principal e deixe a chamada centralizada (`--x 360`) e abaixo do rosto, dentro do miolo 3:4 que aparece no grid do perfil.
 - `assets/`: logo sem fundo, emoji 💀 em PNG e as fontes (Bebas Neue, Montserrat, Oswald; licença OFL).
 
 ```bash
@@ -113,6 +114,12 @@ Referência: [`referencia/02-legenda.jpg`](referencia/02-legenda.jpg)
 python3 scripts/gerar_chamada.py chamada.png \
   --topo "OLHA O QUE ESSES CARAS" --principal "JÁ APRONTARAM!" --emoji assets/emoji-caveira.png \
   --sub "os melhores nocautes dos|lutadores do ufc 333"
+
+# capa (mesma chamada, em 1080x1920, centralizada e abaixo do rosto)
+python3 scripts/gerar_chamada.py chamada-capa.png --escala 1.5 --x 360 --y 680 \
+  --topo "OLHA O QUE ESSES CARAS" --principal "JÁ APRONTARAM!" --emoji assets/emoji-caveira.png \
+  --sub "os melhores nocautes dos|lutadores do ufc 333"
+scripts/gerar_capa.sh clipe.mp4 36.5 chamada-capa.png capa.jpg "@ufc"
 
 # vídeo final (sem legendas: "-" no lugar do .ass)
 CHAMADA=chamada.png CHAMADA_INI=0.2 CHAMADA_FIM=2.8 \
